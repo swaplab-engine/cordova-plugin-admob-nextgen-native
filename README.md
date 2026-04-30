@@ -19,10 +19,10 @@ A professional, high-performance Cordova plugin for rendering seamless, scrollab
   </tr>
   <tr>
     <td width="50%" align="center">
-      <video src="https://github.com/user-attachments/assets/317a0418-37bb-4c3a-969c-75db341e7b1d" width="100%" controls autoplay loop muted playsinline></video>
+      <video src="https://github.com/user-attachments/assets/f1b7a657-ade9-4d6d-9b33-1fc82d894d51" width="100%" controls autoplay loop muted playsinline></video>
     </td>
     <td width="50%" align="center">
-      <video src="https://github.com/user-attachments/assets/8d23576e-b055-4462-a622-516c7371ce2b" width="100%" controls autoplay loop muted playsinline></video>
+      <video src="https://github.com/user-attachments/assets/39d5ed97-8da2-4deb-832b-fa885bb53977" width="100%" controls autoplay loop muted playsinline></video>
     </td>
   </tr>
 </table>
