@@ -1,0 +1,96 @@
+name: 🐛 Bug Report
+description: Create a report to help us improve the plugin
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        **Please fill in all fields.** Reports without logs or reproduction steps may be closed immediately.
+
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Framework
+      description: Which framework are you using?
+      options:
+        - Cordova CLI
+        - Capacitor (v5/v6/v7/v8)
+        - Ionic / Angular
+        - Ionic / React or Vue
+        - Framework7
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_version
+    attributes:
+      label: Plugin Version
+      description: e.g. 1.0.0 (Check your package.json)
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: platform_version
+    attributes:
+      label: Android & Java Version
+      description: e.g. Android 13, JDK 17, Gradle 8.0
+      placeholder: "Android 13 / JDK 17"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: Current Behavior
+      description: Tell us what happens vs what you expected to happen.
+      placeholder: "When I call admobNextGenNative.showWith({...}), the app crashes..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Install plugin version X
+        2. Run app on Android device
+        3. Click button 'Show Ad'
+        4. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Log / Stack Trace
+      description: |
+        Paste the full crash log from Android Studio (Logcat). 
+        ⚠️ Reports without logs are very hard to fix.
+      render: shell
+      placeholder: |
+        Caused by: java.lang.NullPointerException: Attempt to invoke virtual method...
+        at com.emi.cordova.admob.nextgen.native...
+    validations:
+      required: true
+
+  - type: textarea
+    id: config_content
+    attributes:
+      label: Config File (Optional)
+      description: Please paste your `config.xml` (Cordova) or `capacitor.config.json` content (remove secrets/keys!).
+      render: json
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct
+      options:
+        - label: I have searched the existing issues and this is not a duplicate.
+          required: true
+        - label: I have provided the error logs and environment details.
+          required: true

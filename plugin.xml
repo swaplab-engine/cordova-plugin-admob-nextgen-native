@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-admob-nextgen-native"
+        version="1.0.0">
+
+    <name>AdMob NextGen Native</name>
+    <description>AdMob NextGen Native Plugin for Cordova/Capacitor (Android|IOS)</description>
+    <author>EMI INDO</author>
+    <license>MIT</license>
+    <keywords>cordova,admob,native,google,ads,nextgen</keywords>
+
+    <js-module src="www/admob-nextgen-native.js" name="AdMobNative">
+        <clobbers target="admobNextGenNative" />
+    </js-module>
+
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="AdMobNextGenNative">
+                <param name="android-package" value="com.emi.cordova.admob.nextgen.nativead.Plugin" />
+            </feature>
+        </config-file>
+
+        <preference name="ANDROIDX_LAYOUT_VERSION" default="2.2.1" />
+
+        <source-file src="src/android/Plugin.java" target-dir="src/com/emi/cordova/admob/nextgen/nativead" />
+
+        <!-- Template source: https://github.com/googleads/googleads-mobile-android-native-templates -->
+         <source-file src="src/android/NativeTemplateStyle.java" target-dir="src/com/google/android/ads/nativetemplates" />
+
+        <resource-file src="src/android/res/layout/gnt_small_template_view.xml" target="res/layout/gnt_small_template_view.xml" />
+        <resource-file src="src/android/res/layout/gnt_medium_template_view.xml" target="res/layout/gnt_medium_template_view.xml" />
+        
+        <resource-file src="src/android/res/drawable/gnt_outline_shape.xml" target="res/drawable/gnt_outline_shape.xml" />
+        <resource-file src="src/android/res/drawable/gnt_rounded_corners_shape.xml" target="res/drawable/gnt_rounded_corners_shape.xml" />
+
+        <resource-file src="src/android/res/values/gnt_attrs.xml" target="res/values/gnt_attrs.xml" />
+        <resource-file src="src/android/res/values/gnt_colors.xml" target="res/values/gnt_colors.xml" />
+        <resource-file src="src/android/res/values/gnt_dimens.xml" target="res/values/gnt_dimens.xml" />
+
+        <framework src="androidx.constraintlayout:constraintlayout:$ANDROIDX_LAYOUT_VERSION" />
+    </platform>
+
+
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="AdMobNextGenNative">
+                <param name="ios-package" value="AdMobNextGenNativePlugin" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/AdMobNextGenNativePlugin.h" />
+        <source-file src="src/ios/AdMobNextGenNativePlugin.m" />
+
+        <!-- Template source: https://github.com/googleads/googleads-mobile-ios-native-templates -->
+        <header-file src="src/ios/NativeTemplates/GADTTemplateView.h" />
+        <source-file src="src/ios/NativeTemplates/GADTTemplateView.m" />
+        <header-file src="src/ios/NativeTemplates/GADTSmallTemplateView.h" />
+        <source-file src="src/ios/NativeTemplates/GADTSmallTemplateView.m" />
+        <resource-file src="src/ios/NativeTemplates/GADTSmallTemplateView.xib" />
+        
+        <header-file src="src/ios/NativeTemplates/GADTMediumTemplateView.h" />
+        <source-file src="src/ios/NativeTemplates/GADTMediumTemplateView.m" />
+        <resource-file src="src/ios/NativeTemplates/GADTMediumTemplateView.xib" />
+
+        <preference name="IOS_NATIVE_VALIDATOR_ENABLED" default="false" />
+
+        <config-file target="*-Info.plist" parent="GADNativeAdValidatorEnabled">
+            <string>$IOS_NATIVE_VALIDATOR_ENABLED</string>
+        </config-file>
+
+    </platform>
+
+
+</plugin>

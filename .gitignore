@@ -1,0 +1,14 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+*.DS_Store
+/build
+
+
+# Node/Cordova
+/node_modules
+/platforms
+/plugins

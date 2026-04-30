@@ -1,0 +1,39 @@
+{
+  "name": "cordova-plugin-admob-nextgen-native",
+  "version": "1.0.0",
+  "description": "AdMob NextGen Native Plugin for Cordova/Capacitor (Android|IOS)",
+  "cordova": {
+    "id": "cordova-plugin-admob-nextgen-native",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "files": [
+    "www/",
+    "src/",
+    "plugin.xml",
+    "README.md",
+    "package.json",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "cordova-plugin-admob-nextgen": "^1.0.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swaplab-engine/cordova-plugin-admob-nextgen-native.git"
+  },
+  "keywords": [
+    "cordova",
+    "admob",
+    "native",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+    "admob-nextgen",
+    "cordova-plugin-admob-nextgen"
+  ],
+  "author": "EMI INDO",
+  "license": "MIT"
+}
