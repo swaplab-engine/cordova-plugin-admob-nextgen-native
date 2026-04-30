@@ -1,5 +1,13 @@
 # Cordova Plugin AdMob Next-Gen Native
 
+[![AdMob Next Gen](https://img.shields.io/badge/SDK-Google%20Mobile%20Ads%20Next--Gen-blue)](https://ads-developers.googleblog.com/2026/01/announcing-google-mobile-ads-next-gen.html)
+
+[![NPM version](https://img.shields.io/npm/v/cordova-plugin-admob-nextgen-native.svg)](https://www.npmjs.com/package/cordova-plugin-admob-nextgen-native)
+[![Downloads](https://img.shields.io/npm/dm/cordova-plugin-admob-nextgen-native.svg)](https://www.npmjs.com/package/cordova-plugin-admob-nextgen-native)
+[![License](https://img.shields.io/npm/l/cordova-plugin-admob-nextgen-native.svg)](https://github.com/swaplab-engine/cordova-plugin-admob-nextgen-native/blob/main/LICENSE)
+
+**The Ultimate AdMob Monetization Solution for Cordova/Capacitor/Framework7.**
+
 A professional, high-performance Cordova plugin for rendering seamless, scrollable AdMob Native Ads using the latest Google Mobile Ads (GMA) Next-Gen SDK.
 
 ## See It In Action
