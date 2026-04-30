@@ -125,14 +125,15 @@
             }
         }
 
-        // STEP 3: INITIALIZE SDK
+        // STEP 3: INITIALIZE SDK Core 
         function startSdk() {
             window.logToScreen("Initializing AdMob SDK...", "info");
-
+            
             admobNextGen.initialize({
-                maxAdContentRating: 'G',
-                tagForChildDirectedTreatment: false,
-                tagForUnderAgeOfConsent: false
+                maxAdContentRating: 'G',  // 'G' | 'PG' | 'T' | 'MA' | ""
+                tagForChildDirectedTreatment: false, // true | false | null
+                tagForUnderAgeOfConsent: false, // true | false | null
+                isNativeValidatorDisabled: false // Default: true
             }, function () {
                 window.logToScreen("✅ SDK READY TO SERVE ADS", "success");
 

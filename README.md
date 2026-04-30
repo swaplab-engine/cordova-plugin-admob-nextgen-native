@@ -114,15 +114,16 @@ const adContainer = document.getElementById('native-ad-container');
         function startSdk() {
             console.log("Initializing AdMob SDK...", "info");
             admobNextGen.initialize({
-                maxAdContentRating: 'G',
-                tagForChildDirectedTreatment: false,
-                tagForUnderAgeOfConsent: false
+                maxAdContentRating: 'G',  // 'G' | 'PG' | 'T' | 'MA' | ""
+                tagForChildDirectedTreatment: false, // true | false | null
+                tagForUnderAgeOfConsent: false, // true | false | null
+                isNativeValidatorDisabled: false // Default: true
             }, function () {
 
                 showNativeAd();
                 console.log("✅ SDK READY TO SERVE ADS", "success");
             }, function (err) {
-                window.logToScreen("SDK Init Failed: " + err, "error");
+                console.error("SDK Init Failed: " + err, "error");
             });
         }
 
@@ -144,7 +145,7 @@ const adContainer = document.getElementById('native-ad-container');
                         }
                     },
                     function(error) {
-                        console.log("Native Ad Show Failed: " + error, "error");
+                        console.error("Native Ad Show Failed: " + error, "error");
                     }
                 );
             }
