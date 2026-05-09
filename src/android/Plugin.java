@@ -1,7 +1,6 @@
 package com.emi.cordova.admob.nextgen.nativead;
 
 import android.app.Activity;
-import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,9 +36,11 @@ import org.json.JSONObject;
 
 public class Plugin extends CordovaPlugin {
     private static final String TAG = "AdMobNextGenNative";
-    private FrameLayout adContainer;
-    private ViewTreeObserver.OnScrollChangedListener scrollListener;
 
+    private FrameLayout adContainer;
+    private NativeAd currentNativeAd; 
+
+    private ViewTreeObserver.OnScrollChangedListener scrollListener;
     private long lastShowTime = 0;
 
     @Override
@@ -74,14 +75,13 @@ public class Plugin extends CordovaPlugin {
             callbackContext.error(errorMsg);
             return;
         }
-
         lastShowTime = currentTime;
 
         String templateName = options.optString("template", "small");
         int x = options.optInt("x", 0);
         int y = options.optInt("y", 0);
         int width = options.optInt("width", ViewGroup.LayoutParams.MATCH_PARENT);
-        int height = options.optInt("height", ViewGroup.LayoutParams.WRAP_CONTENT);
+        int heightHtml = options.optInt("height", ViewGroup.LayoutParams.WRAP_CONTENT);
 
         activity.runOnUiThread(() -> {
             NativeAdRequest adRequest = new NativeAdRequest.Builder(adUnitId, List.of(NativeAdType.NATIVE)).build();
@@ -90,17 +90,12 @@ public class Plugin extends CordovaPlugin {
                 @Override
                 public void onNativeAdLoaded(@NonNull NativeAd nativeAd) {
                     activity.runOnUiThread(() -> {
-
                         nativeAd.setAdEventCallback(new NativeAdEventCallback() {
                             @Override
-                            public void onAdShowedFullScreenContent() {
-                                fireEvent("on.nextgen.native.shown", null);
-                            }
+                            public void onAdShowedFullScreenContent() { fireEvent("on.nextgen.native.shown", null); }
 
                             @Override
-                            public void onAdDismissedFullScreenContent() {
-                                fireEvent("on.nextgen.native.dismissed", null);
-                            }
+                            public void onAdDismissedFullScreenContent() { fireEvent("on.nextgen.native.dismissed", null); }
 
                             @Override
                             public void onAdFailedToShowFullScreenContent(@NonNull FullScreenContentError error) {
@@ -108,20 +103,14 @@ public class Plugin extends CordovaPlugin {
                                     JSONObject data = new JSONObject();
                                     data.put("message", error.getMessage());
                                     fireEvent("on.nextgen.native.failed.shown", data);
-                                } catch (JSONException e) {
-
-                                }
+                                } catch (JSONException ignored) {}
                             }
 
                             @Override
-                            public void onAdImpression() {
-                                fireEvent("on.nextgen.native.impression", null);
-                            }
+                            public void onAdImpression() { fireEvent("on.nextgen.native.impression", null); }
 
                             @Override
-                            public void onAdClicked() {
-                                fireEvent("on.nextgen.native.clicked", null);
-                            }
+                            public void onAdClicked() { fireEvent("on.nextgen.native.clicked", null); }
 
                             @Override
                             public void onAdPaid(@NonNull AdValue adValue) {
@@ -131,14 +120,40 @@ public class Plugin extends CordovaPlugin {
                                     data.put("currencyCode", adValue.getCurrencyCode());
                                     data.put("precisionType", adValue.getPrecisionType().name());
                                     fireEvent("on.nextgen.native.revenue", data);
-                                } catch (JSONException e) {
-
-                                }
+                                } catch (JSONException ignored) {}
                             }
-
                         });
 
-                        renderAd(activity, nativeAd, x, y, width, height, templateName, callbackContext);
+                        FrameLayout pendingContainer = buildAdContainer(activity, nativeAd, templateName, width);
+
+                        if (adContainer != null && adContainer.getParent() != null) {
+                            ((ViewGroup) adContainer.getParent()).removeView(adContainer);
+                        }
+
+                        if (currentNativeAd != null) {
+                            currentNativeAd.destroy();
+                        }
+
+                        currentNativeAd = nativeAd;
+                        adContainer = pendingContainer;
+
+                        ViewGroup webViewContainer = (ViewGroup) webView.getView().getParent();
+
+                        boolean isMedium = "medium".equalsIgnoreCase(templateName);
+                        int adHeight = isMedium ? dpToPx(350) : ViewGroup.LayoutParams.WRAP_CONTENT;
+
+                        FrameLayout.LayoutParams containerParams = new FrameLayout.LayoutParams(
+                                width > 0 ? dpToPx(width) : ViewGroup.LayoutParams.MATCH_PARENT,
+                                adHeight
+                        );
+                        containerParams.leftMargin = dpToPx(x);
+                        containerParams.topMargin = dpToPx(y);
+
+                        webViewContainer.addView(adContainer, containerParams);
+
+                        setupGlobalLayoutListener(callbackContext);
+
+                        syncScrollObserver();
                     });
                 }
 
@@ -149,7 +164,7 @@ public class Plugin extends CordovaPlugin {
                             JSONObject data = new JSONObject();
                             data.put("message", adError.getMessage());
                             fireEvent("on.nextgen.native.failed.load", data);
-                        } catch (JSONException e) {}
+                        } catch (JSONException ignored) {}
                         callbackContext.error(adError.getMessage());
                     });
                 }
@@ -158,10 +173,8 @@ public class Plugin extends CordovaPlugin {
         });
     }
 
-    private void renderAd(Activity activity, NativeAd nativeAd, int x, int y, int width, int heightHtml, String templateName, CallbackContext callbackContext) {
-        if (adContainer != null && adContainer.getParent() != null) {
-            ((ViewGroup) adContainer.getParent()).removeView(adContainer);
-        }
+    private FrameLayout buildAdContainer(Activity activity, NativeAd nativeAd, String templateName, int width) {
+        FrameLayout newContainer = new FrameLayout(activity);
 
         int layoutId = "medium".equalsIgnoreCase(templateName) ?
                 getResourceId("gnt_medium_template_view", "layout") :
@@ -204,28 +217,22 @@ public class Plugin extends CordovaPlugin {
 
         adView.registerNativeAd(nativeAd, mediaView);
 
-        adContainer = new FrameLayout(activity);
-
         boolean isMedium = "medium".equalsIgnoreCase(templateName);
         int adHeight = isMedium ? dpToPx(350) : ViewGroup.LayoutParams.WRAP_CONTENT;
-
-        FrameLayout.LayoutParams containerParams = new FrameLayout.LayoutParams(
-                width > 0 ? dpToPx(width) : ViewGroup.LayoutParams.MATCH_PARENT,
-                adHeight
-        );
-        containerParams.leftMargin = dpToPx(x);
-        containerParams.topMargin = dpToPx(y);
 
         FrameLayout.LayoutParams adViewParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 adHeight
         );
-        adContainer.addView(adView, adViewParams);
+        newContainer.addView(adView, adViewParams);
 
-        ViewGroup webViewContainer = (ViewGroup) webView.getView().getParent();
-        webViewContainer.addView(adContainer, containerParams);
+        return newContainer;
+    }
 
-        adContainer.getViewTreeObserver().addOnGlobalLayoutListener(new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
+    private void setupGlobalLayoutListener(CallbackContext callbackContext) {
+        if (adContainer == null) return;
+
+        adContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 adContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -239,24 +246,29 @@ public class Plugin extends CordovaPlugin {
                     result.put("height", pxToDp(exactHeightPx));
 
                     fireEvent("on.nextgen.native.loaded", result);
-
                     callbackContext.success(result);
                 } catch (JSONException e) {
                     callbackContext.success();
                 }
             }
         });
+    }
 
-        if (scrollListener != null) webView.getView().getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
-        scrollListener = () -> {
-            if (adContainer != null) {
-                adContainer.setTranslationY(-webView.getView().getScrollY());
-                adContainer.setTranslationX(-webView.getView().getScrollX());
-            }
-        };
-        webView.getView().getViewTreeObserver().addOnScrollChangedListener(scrollListener);
-        adContainer.setTranslationY(-webView.getView().getScrollY());
-        adContainer.setTranslationX(-webView.getView().getScrollX());
+    private void syncScrollObserver() {
+        if (scrollListener == null) {
+            scrollListener = () -> {
+                if (adContainer != null) {
+                    adContainer.setTranslationY(-webView.getView().getScrollY());
+                    adContainer.setTranslationX(-webView.getView().getScrollX());
+                }
+            };
+            webView.getView().getViewTreeObserver().addOnScrollChangedListener(scrollListener);
+        }
+
+        if (adContainer != null) {
+            adContainer.setTranslationY(-webView.getView().getScrollY());
+            adContainer.setTranslationX(-webView.getView().getScrollX());
+        }
     }
 
     private void hideNativeAd(CallbackContext callbackContext) {
@@ -271,10 +283,14 @@ public class Plugin extends CordovaPlugin {
                     ((ViewGroup) adContainer.getParent()).removeView(adContainer);
                 }
                 adContainer = null;
-                callbackContext.success();
-            } else {
-                callbackContext.error("No ad to hide");
             }
+
+            if (currentNativeAd != null) {
+                currentNativeAd.destroy();
+                currentNativeAd = null;
+            }
+
+            callbackContext.success();
         });
     }
 
@@ -294,6 +310,34 @@ public class Plugin extends CordovaPlugin {
     private int pxToDp(int px) {
         float density = cordova.getActivity().getResources().getDisplayMetrics().density;
         return Math.round((float) px / density);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (cordova != null && cordova.getActivity() != null) {
+            cordova.getActivity().runOnUiThread(() -> {
+
+                if (scrollListener != null && webView != null && webView.getView() != null) {
+                    webView.getView().getViewTreeObserver().removeOnScrollChangedListener(scrollListener);
+                    scrollListener = null;
+                }
+
+                if (adContainer != null) {
+                    if (adContainer.getParent() != null) {
+                        ((ViewGroup) adContainer.getParent()).removeView(adContainer);
+                    }
+                    adContainer.removeAllViews();
+                    adContainer = null;
+                }
+
+                if (currentNativeAd != null) {
+                    currentNativeAd.destroy();
+                    currentNativeAd = null;
+                }
+            });
+        }
+
+        super.onDestroy(); 
     }
 
     private void fireEvent(String eventName, JSONObject data) {
