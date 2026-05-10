@@ -40,6 +40,12 @@
 
                         // === Responsive HTML Container ===
                         if (result && result.height) {
+
+                            // Empty the placeholder text to avoid clashing with CSS padding.
+                            adContainer.innerHTML = ''; 
+                            // Apply box-sizing to avoid padding effect
+                            adContainer.style.boxSizing = 'border-box';
+                            // Adjust the container height with precision
                             // Force HTML container to fit native height of Android/IOS Ads
                             adContainer.style.height = result.height + 'px';
                             window.logToScreen("Ad Dimension: " + result.width + "x" + result.height, "info");
