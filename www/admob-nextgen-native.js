@@ -24,6 +24,16 @@ var AdMobNextGenNative = {
             height: rect.height
         };
 
+        var isCordova15Environment = false;
+        if (typeof cordova !== 'undefined' && cordova.platformVersion) {
+            var majorVersion = parseInt(cordova.platformVersion.split('.')[0], 10);
+            if (majorVersion >= 15) {
+                isCordova15Environment = true;
+            }
+        }
+
+        options.isCordova15 = isCordova15Environment;
+
         var args = Object.assign({}, options, layoutParams);
         exec(successCallback, errorCallback, PLUGIN_NAME, 'showWith', [args]);
     }

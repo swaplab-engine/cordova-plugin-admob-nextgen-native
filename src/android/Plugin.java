@@ -1,7 +1,7 @@
 package com.emi.cordova.admob.nextgen.nativead;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -10,7 +10,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-
+import android.view.WindowInsets;
 import androidx.annotation.NonNull;
 
 import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError;
@@ -38,10 +38,11 @@ public class Plugin extends CordovaPlugin {
     private static final String TAG = "AdMobNextGenNative";
 
     private FrameLayout adContainer;
-    private NativeAd currentNativeAd; 
+    private NativeAd currentNativeAd;
 
     private ViewTreeObserver.OnScrollChangedListener scrollListener;
     private long lastShowTime = 0;
+    private boolean isCordova15 = false;
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -67,14 +68,16 @@ public class Plugin extends CordovaPlugin {
             return;
         }
 
+        if (options.has("isCordova15")) this.isCordova15 = options.optBoolean("isCordova15");
         int retryInterval = options.optInt("retryInterval", 5000);
 
         long currentTime = System.currentTimeMillis();
         if (lastShowTime > 0 && (currentTime - lastShowTime) < retryInterval) {
-            String errorMsg = "Anti-spam protection: Request ignored. Please wait " + retryInterval + " ms.";
+            String errorMsg = "Request too fast. Please wait " + retryInterval + " ms to prevent invalid traffic.";
             callbackContext.error(errorMsg);
             return;
         }
+
         lastShowTime = currentTime;
 
         String templateName = options.optString("template", "small");
@@ -146,8 +149,34 @@ public class Plugin extends CordovaPlugin {
                                 width > 0 ? dpToPx(width) : ViewGroup.LayoutParams.MATCH_PARENT,
                                 adHeight
                         );
-                        containerParams.leftMargin = dpToPx(x);
-                        containerParams.topMargin = dpToPx(y);
+
+                        if (isCordova15) {
+
+                            int[] webViewLocation = new int[2];
+                            webView.getView().getLocationOnScreen(webViewLocation);
+                            int[] parentLocation = new int[2];
+                            webViewContainer.getLocationOnScreen(parentLocation);
+
+                            int offsetY = (webViewLocation[1] - parentLocation[1]) + webView.getView().getPaddingTop();
+                            int offsetX = (webViewLocation[0] - parentLocation[0]) + webView.getView().getPaddingLeft();
+
+                            containerParams.leftMargin = dpToPx(x) + offsetX;
+                            containerParams.topMargin = dpToPx(y) + offsetY;
+
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                                adContainer.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                                    @NonNull
+                                    @Override
+                                    public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets insets) {
+                                        return insets; 
+                                    }
+                                });
+                            }
+                        } else {
+
+                            containerParams.leftMargin = dpToPx(x);
+                            containerParams.topMargin = dpToPx(y);
+                        }
 
                         webViewContainer.addView(adContainer, containerParams);
 
@@ -294,6 +323,7 @@ public class Plugin extends CordovaPlugin {
         });
     }
 
+    @SuppressLint("DiscouragedApi")
     private int getResourceId(String name, String defType) {
         return cordova.getActivity().getResources().getIdentifier(name, defType, cordova.getActivity().getPackageName());
     }
