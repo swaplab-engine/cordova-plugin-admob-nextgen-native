@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-admob-nextgen-native",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AdMob NextGen Native Plugin for Cordova/Capacitor (Android|IOS)",
   "cordova": {
     "id": "cordova-plugin-admob-nextgen-native",
