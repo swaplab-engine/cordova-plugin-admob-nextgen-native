@@ -36,6 +36,20 @@ var AdMobNextGenNative = {
 
         var args = Object.assign({}, options, layoutParams);
         exec(successCallback, errorCallback, PLUGIN_NAME, 'showWith', [args]);
+    },
+    
+    updatePosition: function (element, successCallback, errorCallback) {
+        if (!element) return;
+
+        var rect = element.getBoundingClientRect();
+        var layoutParams = {
+            x: rect.left + window.scrollX,
+            y: rect.top + window.scrollY,
+            width: rect.width,
+            height: rect.height
+        };
+
+        exec(successCallback, errorCallback, PLUGIN_NAME, 'updatePosition', [layoutParams]);
     }
 };
 

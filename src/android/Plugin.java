@@ -55,6 +55,12 @@ public class Plugin extends CordovaPlugin {
         } else if ("hide".equals(action)) {
             hideNativeAd(callbackContext);
             return true;
+        } else if ("updatePosition".equals(action)) {
+            JSONObject options = args.optJSONObject(0);
+            if (options != null) {
+                updateAdPosition(options, callbackContext);
+                return true;
+            }
         }
         return false;
     }
@@ -319,6 +325,39 @@ public class Plugin extends CordovaPlugin {
                 currentNativeAd = null;
             }
 
+            callbackContext.success();
+        });
+    }
+
+    private void updateAdPosition(JSONObject options, CallbackContext callbackContext) {
+        if (adContainer == null) return;
+
+        int x = options.optInt("x", 0);
+        int y = options.optInt("y", 0);
+
+        cordova.getActivity().runOnUiThread(() -> {
+            FrameLayout.LayoutParams containerParams = (FrameLayout.LayoutParams) adContainer.getLayoutParams();
+            if (containerParams != null) {
+                ViewGroup webViewContainer = (ViewGroup) webView.getView().getParent();
+
+                if (isCordova15) {
+                    int[] webViewLocation = new int[2];
+                    webView.getView().getLocationOnScreen(webViewLocation);
+                    int[] parentLocation = new int[2];
+                    webViewContainer.getLocationOnScreen(parentLocation);
+
+                    int offsetY = (webViewLocation[1] - parentLocation[1]) + webView.getView().getPaddingTop();
+                    int offsetX = (webViewLocation[0] - parentLocation[0]) + webView.getView().getPaddingLeft();
+
+                    containerParams.leftMargin = dpToPx(x) + offsetX;
+                    containerParams.topMargin = dpToPx(y) + offsetY;
+                } else {
+                    containerParams.leftMargin = dpToPx(x);
+                    containerParams.topMargin = dpToPx(y);
+                }
+
+                adContainer.setLayoutParams(containerParams);
+            }
             callbackContext.success();
         });
     }

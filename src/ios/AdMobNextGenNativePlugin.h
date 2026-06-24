@@ -9,5 +9,6 @@
 
 - (void)showWith:(CDVInvokedUrlCommand *)command;
 - (void)hide:(CDVInvokedUrlCommand *)command;
+- (void)updatePosition:(CDVInvokedUrlCommand *)command;
 
 @end

@@ -68,6 +68,27 @@
     }
 }
 
+- (void)updatePosition:(CDVInvokedUrlCommand *)command {
+    NSDictionary *options = [command.arguments objectAtIndex:0];
+    if (!options || !self.adContainer) {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Ad container is not active or options are missing"] callbackId:command.callbackId];
+        return;
+    }
+
+    CGFloat x = [options[@"x"] floatValue];
+    CGFloat y = [options[@"y"] floatValue];
+
+    CGFloat width = options[@"width"] ? [options[@"width"] floatValue] : self.adContainer.frame.size.width;
+    CGFloat height = options[@"height"] ? [options[@"height"] floatValue] : self.adContainer.frame.size.height;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (self.adContainer) {
+            self.adContainer.frame = CGRectMake(x, y, width, height);
+            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+        }
+    });
+}
+
 #pragma mark - GADNativeAdLoaderDelegate
 
 - (void)adLoader:(GADAdLoader *)adLoader didReceiveNativeAd:(GADNativeAd *)nativeAd {
